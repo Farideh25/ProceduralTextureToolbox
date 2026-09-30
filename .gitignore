@@ -1,0 +1,7 @@
+# Build output (CMake also downloads MiniFB and MicroUI into build/_deps)
+build/
+out/
+
+# Editor / IDE settings
+.vs/
+.vscode/
