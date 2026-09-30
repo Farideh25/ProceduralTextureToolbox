@@ -1,8 +1,16 @@
 #include "ProceduralTextures.h"
+#include "Noise.h"
 #include <algorithm>
+#include <cmath>
 
-static const char* NAMES[TEX_COUNT]    = { "Gradient" };
-static const char* FORMULAS[TEX_COUNT] = { "t = x" };
+static const float PI = 3.14159265f;
+
+static const char* NAMES[TEX_COUNT]    = { "Gradient", "Sine", "Noise" };
+static const char* FORMULAS[TEX_COUNT] = {
+    "t = x",
+    "t = 0.5 + 0.5 sin(2 pi f x)",
+    "t = 0.5 + 0.5 noise(f x, f y, seed)",
+};
 
 const char* textureName(TextureType type) { return NAMES[type]; }
 const char* textureFormula(TextureType type) { return FORMULAS[type]; }
@@ -10,8 +18,14 @@ const char* textureFormula(TextureType type) { return FORMULAS[type]; }
 TextureParams defaultParams(TextureType type) {
     TextureParams p;
     p.type = type;
+    p.frequency = 8.0f;
+    p.seed = 1;
     p.colorA = { 20, 40, 110 };   // dark blue
     p.colorB = { 250, 180, 60 };  // orange
+    if (type == TEX_NOISE) {
+        p.colorA = { 0, 0, 0 };        // black
+        p.colorB = { 255, 255, 255 };  // white
+    }
     return p;
 }
 
@@ -19,6 +33,13 @@ float textureValue(const TextureParams& params, float u, float v) {
     switch (params.type) {
     case TEX_GRADIENT:
         return u;  // 0 at the left edge, 1 at the right edge
+    case TEX_SINE:
+        return 0.5f + 0.5f * std::sin(2.0f * PI * params.frequency * u);
+    case TEX_NOISE:
+        return 0.5f + 0.5f * gradientNoise(
+            params.frequency * u,
+            params.frequency * v,
+            params.seed);
     default:
         return 0.0f;
     }

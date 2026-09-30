@@ -4,6 +4,8 @@
 // Available procedural texture types.
 enum TextureType {
     TEX_GRADIENT,
+    TEX_SINE,
+    TEX_NOISE,
     TEX_COUNT  // number of textures
 };
 
@@ -15,6 +17,8 @@ struct Color {
 // Everything needed to generate one texture.
 struct TextureParams {
     TextureType type;
+    float frequency;  // sine cycles (Sine) or noise lattice cells (Noise) across the texture
+    int seed;         // selects a different, repeatable noise pattern
     Color colorA;  // color where t = 0
     Color colorB;  // color where t = 1
 };

@@ -41,6 +41,18 @@ static bool colorEditor(mu_Context* ctx, const char* label, Color& color) {
     return (result & MU_RES_CHANGE) != 0;
 }
 
+// Slider for an int value. MicroUI sliders edit floats and derive their id from the float's
+// address, so the shared temporary float is combined with an id pushed from the int's address.
+static bool intSlider(mu_Context* ctx, int* value, int low, int high) {
+    static float tmp;
+    mu_push_id(ctx, &value, sizeof(value));
+    tmp = (float)*value;
+    int result = mu_slider_ex(ctx, &tmp, (float)low, (float)high, 1, "%.0f", MU_OPT_ALIGNCENTER);
+    *value = (int)tmp;
+    mu_pop_id(ctx);
+    return (result & MU_RES_CHANGE) != 0;
+}
+
 // The control panel on the right. Returns true if a parameter was changed.
 static bool controlPanel(mu_Context* ctx, TextureParams& params) {
     mu_Rect area = mu_rect(MARGIN + TEXTURE_SIZE + MARGIN, MARGIN, PANEL_WIDTH, TEXTURE_SIZE);
@@ -66,6 +78,18 @@ static bool controlPanel(mu_Context* ctx, TextureParams& params) {
     // The formula of the current texture.
     mu_layout_row(ctx, 1, oneColumn, 0);
     mu_text(ctx, textureFormula(params.type));
+
+    // Parameters of the current texture (later texture types use more of them).
+    int labelAndSlider[] = { 70, -1 };
+    mu_layout_row(ctx, 2, labelAndSlider, 0);
+    if (params.type >= TEX_SINE) {
+        mu_label(ctx, "Frequency");
+        changed |= (mu_slider_ex(ctx, &params.frequency, 1, 32, 0, "%.1f", MU_OPT_ALIGNCENTER) & MU_RES_CHANGE) != 0;
+    }
+    if (params.type >= TEX_NOISE) {
+        mu_label(ctx, "Seed");
+        changed |= intSlider(ctx, &params.seed, 0, 99);
+    }
 
     changed |= colorEditor(ctx, "Color A", params.colorA);
     changed |= colorEditor(ctx, "Color B", params.colorB);

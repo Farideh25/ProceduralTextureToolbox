@@ -24,6 +24,7 @@ FetchContent_MakeAvailable(minifb microui)
 add_executable(ProceduralTextureToolbox
     src/main.cpp
     src/ProceduralTextures.cpp
+    src/Noise.cpp
     src/Ui.cpp
     src/ui_atlas.c
     src/Checks.cpp
