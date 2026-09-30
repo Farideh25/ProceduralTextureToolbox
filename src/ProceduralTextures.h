@@ -8,6 +8,9 @@ enum TextureType {
     TEX_NOISE,
     TEX_FBM,
     TEX_TURBULENCE,
+    TEX_MARBLE,
+    TEX_WOOD,
+    TEX_CLOUDS,
     TEX_COUNT  // number of textures
 };
 
@@ -19,9 +22,10 @@ struct Color {
 // Everything needed to generate one texture.
 struct TextureParams {
     TextureType type;
-    float frequency;  // sine cycles (Sine) or base noise frequency (Noise, fBm, Turbulence)
+    float frequency;  // pattern frequency or base noise frequency, depending on the texture
     int seed;         // selects a different, repeatable noise pattern
-    int octaves;      // number of noise layers (fBm, Turbulence)
+    int octaves;      // number of noise layers (fBm, Turbulence, Marble, Wood, Clouds)
+    float distortion;  // strength of the turbulence distortion (Marble, Wood)
     Color colorA;  // color where t = 0
     Color colorB;  // color where t = 1
 };

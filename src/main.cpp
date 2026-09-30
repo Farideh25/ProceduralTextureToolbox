@@ -94,6 +94,10 @@ static bool controlPanel(mu_Context* ctx, TextureParams& params) {
         mu_label(ctx, "Octaves");
         changed |= intSlider(ctx, &params.octaves, 1, 8);
     }
+    if (params.type == TEX_MARBLE || params.type == TEX_WOOD) {
+        mu_label(ctx, "Distortion");
+        changed |= (mu_slider_ex(ctx, &params.distortion, 0, 5, 0, "%.2f", MU_OPT_ALIGNCENTER) & MU_RES_CHANGE) != 0;
+    }
 
     changed |= colorEditor(ctx, "Color A", params.colorA);
     changed |= colorEditor(ctx, "Color B", params.colorB);

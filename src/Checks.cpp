@@ -99,6 +99,32 @@ int runChecks() {
     check(turbulenceNonNegative, "Turbulence: non-negative");
     check(turbulenceMatchesAbsNoise, "Turbulence (1 octave): same as |noise|");
 
+    // Marble with distortion 0 is the Sine pattern (same frequency).
+    TextureParams marbleParams = defaultParams(TEX_MARBLE);
+    marbleParams.distortion = 0.0f;
+    TextureParams sineParams = defaultParams(TEX_SINE);
+    sineParams.frequency = marbleParams.frequency;
+    bool marbleMatchesSine = true;
+    for (const auto& p : uvPoints)
+        if (std::fabs(textureValue(marbleParams, p[0], p[1]) - textureValue(sineParams, p[0], p[1])) > 1e-5f)
+            marbleMatchesSine = false;
+    check(marbleMatchesSine, "Marble (distortion 0): same as Sine");
+
+    // Wood gives a valid value at the ring center.
+    float woodCenter = textureValue(defaultParams(TEX_WOOD), 0.5f, 0.5f);
+    check(woodCenter >= 0.0f && woodCenter <= 1.0f, "Wood: valid value at the center");
+
+    // Clouds is 0.5 + 0.5 fbm with the same frequency, seed and octaves.
+    TextureParams cloudParams = defaultParams(TEX_CLOUDS);
+    bool cloudsMatchFbm = true;
+    for (const auto& p : uvPoints) {
+        float expected = 0.5f + 0.5f * fbm(cloudParams.frequency * p[0], cloudParams.frequency * p[1],
+                                           cloudParams.seed, cloudParams.octaves);
+        if (std::fabs(textureValue(cloudParams, p[0], p[1]) - expected) > 1e-6f)
+            cloudsMatchFbm = false;
+    }
+    check(cloudsMatchFbm, "Clouds: same as 0.5 + 0.5 fbm");
+
     // Every texture must produce values t in [0, 1].
     for (int i = 0; i < TEX_COUNT; i++) {
         TextureType type = (TextureType)i;

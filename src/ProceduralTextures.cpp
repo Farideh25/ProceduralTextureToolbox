@@ -5,13 +5,16 @@
 
 static const float PI = 3.14159265f;
 
-static const char* NAMES[TEX_COUNT]    = { "Gradient", "Sine", "Noise", "fBm", "Turbulence" };
+static const char* NAMES[TEX_COUNT]    = { "Gradient", "Sine", "Noise", "fBm", "Turbulence", "Marble", "Wood", "Clouds" };
 static const char* FORMULAS[TEX_COUNT] = {
     "t = x",
     "t = 0.5 + 0.5 sin(2 pi f x)",
     "t = 0.5 + 0.5 noise(f x, f y, seed)",
     "weighted sum of noise octaves",
     "weighted sum of |noise| octaves",
+    "sine with turbulence distortion",
+    "distorted radial rings",
+    "fBm mapped to sky colors",
 };
 
 const char* textureName(TextureType type) { return NAMES[type]; }
@@ -23,10 +26,20 @@ TextureParams defaultParams(TextureType type) {
     p.frequency = 8.0f;
     p.seed = 1;
     p.octaves = 4;
+    p.distortion = 2.0f;
     p.colorA = { 20, 40, 110 };   // dark blue
     p.colorB = { 250, 180, 60 };  // orange
     if (type == TEX_NOISE || type == TEX_FBM || type == TEX_TURBULENCE) {
         p.colorA = { 0, 0, 0 };        // black
+        p.colorB = { 255, 255, 255 };  // white
+    } else if (type == TEX_MARBLE) {
+        p.colorA = { 60, 60, 70 };     // dark stone
+        p.colorB = { 235, 232, 225 };  // light stone
+    } else if (type == TEX_WOOD) {
+        p.colorA = { 95, 55, 25 };     // dark brown
+        p.colorB = { 205, 155, 95 };   // light brown
+    } else if (type == TEX_CLOUDS) {
+        p.colorA = { 90, 150, 220 };   // sky blue
         p.colorB = { 255, 255, 255 };  // white
     }
     return p;
@@ -51,6 +64,35 @@ float textureValue(const TextureParams& params, float u, float v) {
             params.octaves);
     case TEX_TURBULENCE:
         return turbulence(
+            params.frequency * u,
+            params.frequency * v,
+            params.seed,
+            params.octaves);
+    case TEX_MARBLE: {
+        // Sine stripes whose phase is shifted by turbulence.
+        float noise = turbulence(
+            params.frequency * u,
+            params.frequency * v,
+            params.seed,
+            params.octaves);
+        float phase = params.frequency * u + params.distortion * noise;
+        return 0.5f + 0.5f * std::sin(2.0f * PI * phase);
+    }
+    case TEX_WOOD: {
+        // Sine rings around the texture center; turbulence shifts the radius.
+        float dx = u - 0.5f;
+        float dy = v - 0.5f;
+        float radius = std::sqrt(dx * dx + dy * dy);
+        float noise = turbulence(
+            params.frequency * u,
+            params.frequency * v,
+            params.seed,
+            params.octaves);
+        float warpedRadius = radius + params.distortion * 0.05f * noise;  // at most 5% of the texture per unit of distortion
+        return 0.5f + 0.5f * std::sin(2.0f * PI * params.frequency * warpedRadius);
+    }
+    case TEX_CLOUDS:
+        return 0.5f + 0.5f * fbm(
             params.frequency * u,
             params.frequency * v,
             params.seed,
