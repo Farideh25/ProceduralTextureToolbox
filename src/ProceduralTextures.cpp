@@ -5,11 +5,13 @@
 
 static const float PI = 3.14159265f;
 
-static const char* NAMES[TEX_COUNT]    = { "Gradient", "Sine", "Noise" };
+static const char* NAMES[TEX_COUNT]    = { "Gradient", "Sine", "Noise", "fBm", "Turbulence" };
 static const char* FORMULAS[TEX_COUNT] = {
     "t = x",
     "t = 0.5 + 0.5 sin(2 pi f x)",
     "t = 0.5 + 0.5 noise(f x, f y, seed)",
+    "weighted sum of noise octaves",
+    "weighted sum of |noise| octaves",
 };
 
 const char* textureName(TextureType type) { return NAMES[type]; }
@@ -20,9 +22,10 @@ TextureParams defaultParams(TextureType type) {
     p.type = type;
     p.frequency = 8.0f;
     p.seed = 1;
+    p.octaves = 4;
     p.colorA = { 20, 40, 110 };   // dark blue
     p.colorB = { 250, 180, 60 };  // orange
-    if (type == TEX_NOISE) {
+    if (type == TEX_NOISE || type == TEX_FBM || type == TEX_TURBULENCE) {
         p.colorA = { 0, 0, 0 };        // black
         p.colorB = { 255, 255, 255 };  // white
     }
@@ -40,6 +43,18 @@ float textureValue(const TextureParams& params, float u, float v) {
             params.frequency * u,
             params.frequency * v,
             params.seed);
+    case TEX_FBM:
+        return 0.5f + 0.5f * fbm(
+            params.frequency * u,
+            params.frequency * v,
+            params.seed,
+            params.octaves);
+    case TEX_TURBULENCE:
+        return turbulence(
+            params.frequency * u,
+            params.frequency * v,
+            params.seed,
+            params.octaves);
     default:
         return 0.0f;
     }

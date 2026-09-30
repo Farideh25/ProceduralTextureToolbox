@@ -59,3 +59,33 @@ float gradientNoise(float x, float y, int seed) {
     // the contributions, so n / sqrt(2) lies in [-1, 1].
     return n / 1.41421356f;
 }
+
+// x and y are already multiplied by the texture frequency; octave i samples at 2^i times that.
+float fbm(float x, float y, int seed, int octaves) {
+    float sum = 0.0f;
+    float amplitude = 1.0f;
+    float totalAmplitude = 0.0f;
+    float frequency = 1.0f;  // relative to the texture frequency
+    for (int i = 0; i < octaves; i++) {
+        sum += amplitude * gradientNoise(frequency * x, frequency * y, seed);
+        totalAmplitude += amplitude;
+        frequency *= 2.0f;
+        amplitude *= 0.5f;
+    }
+    return sum / totalAmplitude;
+}
+
+// Same octaves as fbm, with the absolute value of each noise layer.
+float turbulence(float x, float y, int seed, int octaves) {
+    float sum = 0.0f;
+    float amplitude = 1.0f;
+    float totalAmplitude = 0.0f;
+    float frequency = 1.0f;  // relative to the texture frequency
+    for (int i = 0; i < octaves; i++) {
+        sum += amplitude * std::fabs(gradientNoise(frequency * x, frequency * y, seed));
+        totalAmplitude += amplitude;
+        frequency *= 2.0f;
+        amplitude *= 0.5f;
+    }
+    return sum / totalAmplitude;
+}

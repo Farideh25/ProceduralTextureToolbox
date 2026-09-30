@@ -90,6 +90,10 @@ static bool controlPanel(mu_Context* ctx, TextureParams& params) {
         mu_label(ctx, "Seed");
         changed |= intSlider(ctx, &params.seed, 0, 99);
     }
+    if (params.type >= TEX_FBM) {
+        mu_label(ctx, "Octaves");
+        changed |= intSlider(ctx, &params.octaves, 1, 8);
+    }
 
     changed |= colorEditor(ctx, "Color A", params.colorA);
     changed |= colorEditor(ctx, "Color B", params.colorB);

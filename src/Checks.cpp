@@ -74,6 +74,31 @@ int runChecks() {
                 zeroAtLattice = false;
     check(zeroAtLattice, "Noise: exactly 0 at lattice points");
 
+    // fBm with 1 octave is the base noise (same frequency and seed).
+    TextureParams noiseParams = defaultParams(TEX_NOISE);
+    TextureParams fbmParams = defaultParams(TEX_FBM);
+    fbmParams.frequency = noiseParams.frequency;
+    fbmParams.seed = noiseParams.seed;
+    fbmParams.octaves = 1;
+    const float uvPoints[][2] = { { 0.1f, 0.2f }, { 0.35f, 0.8f }, { 0.6f, 0.45f }, { 0.9f, 0.15f } };
+    bool fbmMatchesNoise = true;
+    for (const auto& p : uvPoints)
+        if (std::fabs(textureValue(fbmParams, p[0], p[1]) - textureValue(noiseParams, p[0], p[1])) > 1e-6f)
+            fbmMatchesNoise = false;
+    check(fbmMatchesNoise, "fBm (1 octave): same as Noise");
+
+    // Turbulence is non-negative; with 1 octave it is |noise|.
+    bool turbulenceNonNegative = true;
+    bool turbulenceMatchesAbsNoise = true;
+    for (const auto& s : samples) {
+        if (turbulence(s[0], s[1], 1, 4) < 0.0f)
+            turbulenceNonNegative = false;
+        if (std::fabs(turbulence(s[0], s[1], 1, 1) - std::fabs(gradientNoise(s[0], s[1], 1))) > 1e-6f)
+            turbulenceMatchesAbsNoise = false;
+    }
+    check(turbulenceNonNegative, "Turbulence: non-negative");
+    check(turbulenceMatchesAbsNoise, "Turbulence (1 octave): same as |noise|");
+
     // Every texture must produce values t in [0, 1].
     for (int i = 0; i < TEX_COUNT; i++) {
         TextureType type = (TextureType)i;
