@@ -63,7 +63,7 @@ static bool controlPanel(mu_Context* ctx, TextureParams& params) {
     int oneColumn[] = { -1 };
     int twoColumns[] = { 143, -1 };
 
-// Texture type: one button per available texture.
+    // Texture type: one button per available texture.
     mu_layout_row(ctx, 1, oneColumn, 0);
     mu_label(ctx, "Texture");
     mu_layout_row(ctx, 2, twoColumns, 0);
@@ -75,11 +75,11 @@ static bool controlPanel(mu_Context* ctx, TextureParams& params) {
         }
     }
 
-    // The formula of the current texture.
+    // Short formula or description of the current texture.
     mu_layout_row(ctx, 1, oneColumn, 0);
     mu_text(ctx, textureFormula(params.type));
 
-    // Parameters of the current texture (later texture types use more of them).
+    // Parameters used by the current texture.
     int labelAndSlider[] = { 70, -1 };
     mu_layout_row(ctx, 2, labelAndSlider, 0);
     if (params.type >= TEX_SINE) {

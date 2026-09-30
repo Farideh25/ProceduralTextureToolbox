@@ -34,7 +34,7 @@ struct TextureParams {
 TextureParams defaultParams(TextureType type);
 
 const char* textureName(TextureType type);
-const char* textureFormula(TextureType type);  // short formula shown in the UI
+const char* textureFormula(TextureType type);  // short formula or description shown in the UI
 
 // The value t in [0, 1] of the texture at texture coordinates (u, v), both in [0, 1].
 float textureValue(const TextureParams& params, float u, float v);
