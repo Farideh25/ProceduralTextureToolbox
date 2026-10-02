@@ -1,3 +1,7 @@
+* **Name:** [Farida Dabit]
+* **Student ID:** [212693345]
+**Course:** Computer Graphics
+
 # Procedural Texture Toolbox
 
 An interactive C++ application that generates procedural textures from mathematical functions, ranging from a simple color gradient to noise-based marble, wood and cloud textures.
