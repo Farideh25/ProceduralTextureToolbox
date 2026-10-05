@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdio>
 #include <string>
+#include <algorithm>
 
 static int failures = 0;
 
@@ -98,7 +99,7 @@ int runChecks() {
     }
     check(turbulenceNonNegative, "Turbulence: non-negative");
     check(turbulenceMatchesAbsNoise, "Turbulence (1 octave): same as |noise|");
-    
+
 // Zero octaves must not produce NaN or infinity.
 check(std::isfinite(fbm(0.3f, 0.7f, 1, 0)),
       "fBm (0 octaves): result is finite");
@@ -120,16 +121,25 @@ check(std::isfinite(turbulence(0.3f, 0.7f, 1, 0)),
     float woodCenter = textureValue(defaultParams(TEX_WOOD), 0.5f, 0.5f);
     check(woodCenter >= 0.0f && woodCenter <= 1.0f, "Wood: valid value at the center");
 
-    // Clouds is 0.5 + 0.5 fbm with the same frequency, seed and octaves.
-    TextureParams cloudParams = defaultParams(TEX_CLOUDS);
-    bool cloudsMatchFbm = true;
+    // Clouds starts from fBm and expands contrast around the midpoint.
+     TextureParams cloudParams = defaultParams(TEX_CLOUDS);
+    bool cloudsMatchContrastRemap = true;
     for (const auto& p : uvPoints) {
-        float expected = 0.5f + 0.5f * fbm(cloudParams.frequency * p[0], cloudParams.frequency * p[1],
-                                           cloudParams.seed, cloudParams.octaves);
-        if (std::fabs(textureValue(cloudParams, p[0], p[1]) - expected) > 1e-6f)
-            cloudsMatchFbm = false;
+        float base = 0.5f + 0.5f * fbm(
+            cloudParams.frequency * p[0],
+            cloudParams.frequency * p[1],
+            cloudParams.seed,
+            cloudParams.octaves);
+
+        float expected = std::clamp(
+            0.5f + 1.35f * (base - 0.5f),
+            0.0f,
+            1.0f);
+
+    if (std::fabs(textureValue(cloudParams, p[0], p[1]) - expected) > 1e-6f)
+        cloudsMatchContrastRemap = false;
     }
-    check(cloudsMatchFbm, "Clouds: same as 0.5 + 0.5 fbm");
+    check(cloudsMatchContrastRemap, "Clouds: applies contrast remapping to fBm");
 
     // Every texture must produce values t in [0, 1].
     for (int i = 0; i < TEX_COUNT; i++) {

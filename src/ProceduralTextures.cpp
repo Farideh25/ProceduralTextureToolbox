@@ -91,12 +91,16 @@ float textureValue(const TextureParams& params, float u, float v) {
         float warpedRadius = radius + params.distortion * 0.05f * noise;  // at most 5% of the texture per unit of distortion
         return 0.5f + 0.5f * std::sin(2.0f * PI * params.frequency * warpedRadius);
     }
-    case TEX_CLOUDS:
-        return 0.5f + 0.5f * fbm(
-            params.frequency * u,
-            params.frequency * v,
-            params.seed,
-            params.octaves);
+    case TEX_CLOUDS: {
+    float t = 0.5f + 0.5f * fbm(
+        params.frequency * u,
+        params.frequency * v,
+        params.seed,
+        params.octaves);
+
+    // Expand the contrast around the midpoint so the cloud structure is easier to see.
+    return std::clamp(0.5f + 1.35f * (t - 0.5f), 0.0f, 1.0f);
+}
     default:
         return 0.0f;
     }

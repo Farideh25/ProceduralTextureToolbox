@@ -42,7 +42,7 @@ The textures are ordered so that each one builds on the previous ones. In the fo
 
 7. **Wood**: radial sine rings around the texture center, with the radius distorted by turbulence: `r = distance((u, v), (0.5, 0.5))` and `t = 0.5 + 0.5 sin(2π f (r + 0.05 d · turbulence))`.
 
-8. **Clouds**: fBm, `t = 0.5 + 0.5 fbm`, mapped between a sky-blue Color A and a white Color B.
+8. **Clouds**: fBm with contrast enhancement. The base value is `t = 0.5 + 0.5 fbm`, then the distance from the midpoint is scaled by 1.35 and clamped to `[0, 1]`. This makes the cloud structure more visible while keeping the same sky-blue to white color mapping.
 
 In the Marble and Wood formulas, `turbulence` is the Turbulence value at `(f u, f v)` with the current seed and number of octaves.
 
