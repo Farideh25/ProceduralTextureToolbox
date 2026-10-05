@@ -98,6 +98,12 @@ int runChecks() {
     }
     check(turbulenceNonNegative, "Turbulence: non-negative");
     check(turbulenceMatchesAbsNoise, "Turbulence (1 octave): same as |noise|");
+    
+// Zero octaves must not produce NaN or infinity.
+check(std::isfinite(fbm(0.3f, 0.7f, 1, 0)),
+      "fBm (0 octaves): result is finite");
+check(std::isfinite(turbulence(0.3f, 0.7f, 1, 0)),
+      "Turbulence (0 octaves): result is finite");
 
     // Marble with distortion 0 is the Sine pattern (same frequency).
     TextureParams marbleParams = defaultParams(TEX_MARBLE);

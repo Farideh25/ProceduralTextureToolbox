@@ -62,6 +62,9 @@ float gradientNoise(float x, float y, int seed) {
 
 // x and y are already multiplied by the texture frequency; octave i samples at 2^i times that.
 float fbm(float x, float y, int seed, int octaves) {
+    if (octaves <= 0)
+        return 0.0f;
+
     float sum = 0.0f;
     float amplitude = 1.0f;
     float totalAmplitude = 0.0f;
@@ -77,6 +80,9 @@ float fbm(float x, float y, int seed, int octaves) {
 
 // Same octaves as fbm, with the absolute value of each noise layer.
 float turbulence(float x, float y, int seed, int octaves) {
+    if (octaves <= 0)
+        return 0.0f;
+
     float sum = 0.0f;
     float amplitude = 1.0f;
     float totalAmplitude = 0.0f;
