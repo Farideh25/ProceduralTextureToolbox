@@ -98,7 +98,7 @@ Run the correctness checks:
 - Turbulence is non-negative, and with one octave matches `|noise|`
 - Marble with distortion 0 matches the Sine pattern
 - Wood gives a valid value at the ring center
-- Clouds matches `0.5 + 0.5 fbm`
+- Clouds matches the contrast-enhanced fBm mapping, including the 1.35 midpoint scaling and clamping to `[0, 1]`
 - The values of every texture stay in `[0, 1]` on a grid of sample points (default parameters)
 
 These checks are not exhaustive. The visual output of all eight textures was checked manually.
@@ -114,6 +114,16 @@ The eight textures with their default parameters:
 | ![Gradient](screenshots/01-gradient.png)<br>Gradient | ![Sine](screenshots/02-sine.png)<br>Sine | ![Noise](screenshots/03-noise.png)<br>Noise |
 | ![fBm](screenshots/04-fbm.png)<br>fBm | ![Turbulence](screenshots/05-turbulence.png)<br>Turbulence | |
 | ![Marble](screenshots/06-marble.png)<br>Marble | ![Wood](screenshots/07-wood.png)<br>Wood | ![Clouds](screenshots/08-clouds.png)<br>Clouds |
+
+
+## Development and Refinement Process
+
+Once the main implementation was working, I went through the project again by rebuilding it, running the correctness checks, and comparing the texture outputs visually.
+
+During this review:
+- I found that fBm and turbulence could produce NaN when called with zero octaves, so I added a guard for that edge case and corresponding checks.
+- The default Clouds texture looked too washed out, so I adjusted its contrast mapping and updated the related check and documentation.
+- I also tested a different noise approach for the Wood distortion. It did not improve the visual result, so I reverted that experiment instead of keeping the change.
 
 ## AI-Assisted Development
 
