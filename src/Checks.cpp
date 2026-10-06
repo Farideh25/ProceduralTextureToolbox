@@ -19,7 +19,7 @@ static bool valuesInRange(const TextureParams& params) {
     for (int y = 0; y <= 100; y++)
         for (int x = 0; x <= 100; x++) {
             float t = textureValue(params, x / 100.0f, y / 100.0f);
-            if (t < 0.0f || t > 1.0f)
+            if (!std::isfinite(t) || t < 0.0f || t > 1.0f)
                 return false;
         }
     return true;
