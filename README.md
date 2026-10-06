@@ -46,6 +46,17 @@ The textures are ordered so that each one builds on the previous ones. In the fo
 
 In the Marble and Wood formulas, `turbulence` is the Turbulence value at `(f u, f v)` with the current seed and number of octaves.
 
+## Design Rationale
+
+I built the textures in stages, starting with simple mathematical patterns and then reusing the same ideas to create more complex results.
+
+- Gradient was the starting point for mapping texture coordinates directly to a color value.
+- Sine added a repeating pattern and introduced frequency as an interactive parameter.
+- Gradient Noise replaced the regular pattern with smooth deterministic variation controlled by a seed.
+- fBm combined several noise octaves to add detail at different scales, while Turbulence used the absolute value of the noise to create sharper structures.
+- Marble and Wood use turbulence to distort otherwise regular patterns: sine bands for Marble and radial rings for Wood.
+- Clouds use fBm directly because its multi-scale structure already produces a natural irregular pattern. After visual testing, I increased the contrast because the original result looked too flat.
+
 ## Controls
 
 | Control | Meaning | Shown for |
