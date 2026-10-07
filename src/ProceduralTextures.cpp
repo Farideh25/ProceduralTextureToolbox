@@ -26,6 +26,8 @@ TextureParams defaultParams(TextureType type) {
     p.frequency = 8.0f;
     p.seed = 1;
     p.octaves = 4;
+    p.lacunarity = 2.0f;
+    p.gain = 0.5f;
     p.distortion = 2.0f;
     p.colorA = { 20, 40, 110 };   // dark blue
     p.colorB = { 250, 180, 60 };  // orange
@@ -61,20 +63,26 @@ float textureValue(const TextureParams& params, float u, float v) {
             params.frequency * u,
             params.frequency * v,
             params.seed,
-            params.octaves);
+            params.octaves,
+            params.lacunarity,
+            params.gain);
     case TEX_TURBULENCE:
         return turbulence(
             params.frequency * u,
             params.frequency * v,
             params.seed,
-            params.octaves);
+            params.octaves,
+            params.lacunarity,
+            params.gain);
     case TEX_MARBLE: {
         // Sine stripes whose phase is shifted by turbulence.
         float noise = turbulence(
             params.frequency * u,
             params.frequency * v,
             params.seed,
-            params.octaves);
+            params.octaves,
+            params.lacunarity,
+            params.gain);
         float phase = params.frequency * u + params.distortion * noise;
         return 0.5f + 0.5f * std::sin(2.0f * PI * phase);
     }
@@ -87,7 +95,9 @@ float textureValue(const TextureParams& params, float u, float v) {
             params.frequency * u,
             params.frequency * v,
             params.seed,
-            params.octaves);
+            params.octaves,
+            params.lacunarity,
+            params.gain);
         float warpedRadius = radius + params.distortion * 0.05f * noise;  // at most 5% of the texture per unit of distortion
         return 0.5f + 0.5f * std::sin(2.0f * PI * params.frequency * warpedRadius);
     }
@@ -96,7 +106,9 @@ float textureValue(const TextureParams& params, float u, float v) {
         params.frequency * u,
         params.frequency * v,
         params.seed,
-        params.octaves);
+        params.octaves,
+        params.lacunarity,
+        params.gain);
 
     // Expand the contrast around the midpoint so the cloud structure is easier to see.
     return std::clamp(0.5f + 1.35f * (t - 0.5f), 0.0f, 1.0f);

@@ -25,6 +25,8 @@ struct TextureParams {
     float frequency;  // pattern frequency or base noise frequency, depending on the texture
     int seed;         // selects a different, repeatable noise pattern
     int octaves;      // number of noise layers (fBm, Turbulence, Marble, Wood, Clouds)
+    float lacunarity; // frequency multiplier between noise octaves
+    float gain;       // amplitude multiplier between noise octaves
     float distortion;  // strength of the turbulence distortion (Marble, Wood)
     Color colorA;  // color where t = 0
     Color colorB;  // color where t = 1
