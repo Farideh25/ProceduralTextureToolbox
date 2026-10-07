@@ -35,8 +35,9 @@ The textures are ordered so that each one builds on the previous ones. In the fo
    The same seed always produces the same noise.
 
 4. **fBm (fractal Brownian motion)**: several octaves of noise are added. Lacunarity controls how much the frequency increases between octaves, while gain controls how much the amplitude decreases. The default values are lacunarity 2.0 and gain 0.5, which give the original behavior of doubling the frequency and halving the amplitude at each octave. The sum is divided by the total amplitude, and `t = 0.5 + 0.5 fbm`. With one octave, fBm equals the Noise texture.
+In general, the normalized octave sum is `fbm = sum(gain^i * noise(lacunarity^i * f * u, lacunarity^i * f * v)) / sum(gain^i)` for `i = 0 ... octaves - 1`.
 
-5. **Turbulence**: uses the same octave structure as fBm, including the lacunarity and gain controls, but takes the absolute value of each noise octave. This folds the noise around zero and creates sharper structures.
+5. **Turbulence**: uses the same octave structure as fBm, including the lacunarity and gain controls, but takes the absolute value of each noise octave. This folds the noise around zero and creates sharper structures.Its normalized octave sum is `turbulence = sum(gain^i * |noise(lacunarity^i * f * u, lacunarity^i * f * v)|) / sum(gain^i)`.
 
 6. **Marble**: the sine pattern with its phase distorted by turbulence: `t = 0.5 + 0.5 sin(2π (f u + d · turbulence))`. With distortion 0, Marble reduces to the Sine pattern.
 
@@ -128,6 +129,23 @@ The eight textures with their default parameters:
 | ![fBm](screenshots/04-fbm.png)<br>fBm | ![Turbulence](screenshots/05-turbulence.png)<br>Turbulence | |
 | ![Marble](screenshots/06-marble.png)<br>Marble | ![Wood](screenshots/07-wood.png)<br>Wood | ![Clouds](screenshots/08-clouds.png)<br>Clouds |
 
+## Parameter Comparison (fBm)
+
+To evaluate the new lacunarity and gain controls, I compared the fBm texture at fixed frequency and octave settings (`frequency = 8`, `octaves = 4`) while varying one parameter at a time.
+
+### Gain comparison (`lacunarity = 2.0`)
+
+| Gain = 0.30 | Gain = 0.50 | Gain = 0.80 |
+|:-:|:-:|:-:|
+| ![fBm gain 0.30](screenshots/compare-gain-030.png)<br>Lower gain reduces the contribution of the higher octaves, so the texture looks smoother. | ![fBm gain 0.50](screenshots/compare-gain-050.png)<br>This gives a balanced amount of multi-scale detail. | ![fBm gain 0.80](screenshots/compare-gain-080.png)<br>Higher gain keeps the fine-detail octaves stronger, so the texture becomes more grainy and dense. |
+
+### Lacunarity comparison (`gain = 0.5`)
+
+| Lacunarity = 1.50 | Lacunarity = 2.00 | Lacunarity = 3.00 |
+|:-:|:-:|:-:|
+| ![fBm lacunarity 1.50](screenshots/compare-lacunarity-150.png)<br>Lower lacunarity keeps successive octaves closer in scale, so the texture changes more gradually. | ![fBm lacunarity 2.00](screenshots/compare-gain-050.png)<br>This produces a clear multi-scale structure without making the result too busy. | ![fBm lacunarity 3.00](screenshots/compare-lacunarity-300.png)<br>Higher lacunarity increases the jump in frequency between octaves, producing smaller and denser details. |
+
+From these comparisons, I kept the defaults at `lacunarity = 2.0` and `gain = 0.5`. They preserve visible detail at multiple scales, while keeping the default fBm result less noisy than the higher-gain and higher-lacunarity settings.
 
 ## Development and Refinement Process
 
