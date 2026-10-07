@@ -34,9 +34,9 @@ The textures are ordered so that each one builds on the previous ones. In the fo
 
    The same seed always produces the same noise.
 
-4. **fBm (fractal Brownian motion)**: several octaves of noise are added. Each octave doubles the frequency and halves the amplitude of the previous one, and the sum is divided by the total amplitude: `fbm = Σ 0.5^i · noise(2^i f u, 2^i f v) / Σ 0.5^i` for `i = 0 … octaves − 1`, and `t = 0.5 + 0.5 fbm`. With one octave, fBm equals the Noise texture.
+4. **fBm (fractal Brownian motion)**: several octaves of noise are added. Lacunarity controls how much the frequency increases between octaves, while gain controls how much the amplitude decreases. The default values are lacunarity 2.0 and gain 0.5, which give the original behavior of doubling the frequency and halving the amplitude at each octave. The sum is divided by the total amplitude, and `t = 0.5 + 0.5 fbm`. With one octave, fBm equals the Noise texture.
 
-5. **Turbulence**: the same octave sum as fBm, but with the absolute value of each noise octave: `t = Σ 0.5^i · |noise(2^i f u, 2^i f v)| / Σ 0.5^i`. The absolute value folds the noise at its zero crossings, which creates sharp creases.
+5. **Turbulence**: uses the same octave structure as fBm, including the lacunarity and gain controls, but takes the absolute value of each noise octave. This folds the noise around zero and creates sharper structures.
 
 6. **Marble**: the sine pattern with its phase distorted by turbulence: `t = 0.5 + 0.5 sin(2π (f u + d · turbulence))`. With distortion 0, Marble reduces to the Sine pattern.
 
@@ -65,11 +65,13 @@ I built the textures in stages, starting with simple mathematical patterns and t
 | Frequency (1–32) | Pattern frequency (sine cycles or rings) and base noise frequency | all except Gradient |
 | Seed (0–99) | Selects a different, repeatable noise pattern | Noise, fBm, Turbulence, Marble, Wood, Clouds |
 | Octaves (1–8) | Number of noise octaves | fBm, Turbulence, Marble, Wood, Clouds |
+| Lacunarity (1.0–4.0) | Frequency multiplier between successive noise octaves | fBm, Turbulence, Marble, Wood, Clouds |
+| Gain (0.1–0.9) | Amplitude multiplier between successive noise octaves | fBm, Turbulence, Marble, Wood, Clouds |
 | Distortion (0–5) | Strength of the turbulence distortion | Marble, Wood |
 | Color A / Color B | Colors for `t = 0` and `t = 1`, set with R, G, B sliders | all |
 | Reset | Restores the default parameters of the current texture | all |
 
-Only the controls used by the selected texture are shown, and the panel displays a short formula or description of that texture. The default parameters are frequency 8, seed 1, octaves 4 and distortion 2, with colors chosen per texture.
+Only the controls used by the selected texture are shown, and the panel displays a short formula or description of that texture. The default parameters are frequency 8, seed 1, octaves 4, lacunarity 2.0, gain 0.5 and distortion 2, with colors chosen per texture.
 
 ## Build and Run
 
@@ -129,12 +131,14 @@ The eight textures with their default parameters:
 
 ## Development and Refinement Process
 
-Once the main implementation was working, I went through the project again by rebuilding it, running the correctness checks, and comparing the texture outputs visually.
+After the main implementation was working, I went back through the project by rebuilding it, running the checks and comparing the texture outputs visually.
 
 During this review:
-- I found that fBm and turbulence could produce NaN when called with zero octaves, so I added a guard for that edge case and corresponding checks.
-- The default Clouds texture looked too washed out, so I adjusted its contrast mapping and updated the related check and documentation.
-- I also tested a different noise approach for the Wood distortion. It did not improve the visual result, so I reverted that experiment instead of keeping the change.
+- I found that fBm and turbulence could produce NaN when called with zero octaves, so I added a guard for that case and corresponding checks.
+- The default Clouds texture looked too washed out, so I increased the contrast around the midpoint and updated the related check.
+- I tested a different noise approach for the Wood distortion locally. It did not improve the visual result, so I reverted that experiment before committing it.
+- I later exposed the lacunarity and gain values that were previously fixed inside fBm and turbulence. I added UI controls for both and compared their effect on fBm, Turbulence, Clouds and Marble.
+- After the visual comparison, I kept the original default values of lacunarity 2.0 and gain 0.5 because they gave the most balanced default result, while keeping the controls available for experimentation.
 
 ## AI-Assisted Development
 
