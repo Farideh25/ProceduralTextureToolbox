@@ -1,5 +1,5 @@
-* **Name:** [Farida Dabit]
-* **Student ID:** [212693345]
+* **Name:** Farida Dabit
+* **Student ID:** 212693345
 **Course:** Computer Graphics
 
 # Procedural Texture Toolbox
@@ -37,7 +37,7 @@ The textures are ordered so that each one builds on the previous ones. In the fo
 4. **fBm (fractal Brownian motion)**: several octaves of noise are added. Lacunarity controls how much the frequency increases between octaves, while gain controls how much the amplitude decreases. The default values are lacunarity 2.0 and gain 0.5, which give the original behavior of doubling the frequency and halving the amplitude at each octave. The sum is divided by the total amplitude, and `t = 0.5 + 0.5 fbm`. With one octave, fBm equals the Noise texture.
 In general, the normalized octave sum is `fbm = sum(gain^i * noise(lacunarity^i * f * u, lacunarity^i * f * v)) / sum(gain^i)` for `i = 0 ... octaves - 1`.
 
-5. **Turbulence**: uses the same octave structure as fBm, including the lacunarity and gain controls, but takes the absolute value of each noise octave. This folds the noise around zero and creates sharper structures.Its normalized octave sum is `turbulence = sum(gain^i * |noise(lacunarity^i * f * u, lacunarity^i * f * v)|) / sum(gain^i)`.
+5. **Turbulence**: uses the same octave structure as fBm, including the lacunarity and gain controls, but takes the absolute value of each noise octave. This folds the noise around zero and creates sharper structures. Its normalized octave sum is `turbulence = sum(gain^i * |noise(lacunarity^i * f * u, lacunarity^i * f * v)|) / sum(gain^i)`.
 
 6. **Marble**: the sine pattern with its phase distorted by turbulence: `t = 0.5 + 0.5 sin(2π (f u + d · turbulence))`. With distortion 0, Marble reduces to the Sine pattern.
 
@@ -45,7 +45,7 @@ In general, the normalized octave sum is `fbm = sum(gain^i * noise(lacunarity^i 
 
 8. **Clouds**: fBm with contrast enhancement. The base value is `t = 0.5 + 0.5 fbm`, then the distance from the midpoint is scaled by 1.35 and clamped to `[0, 1]`. This makes the cloud structure more visible while keeping the same sky-blue to white color mapping.
 
-In the Marble and Wood formulas, `turbulence` is the Turbulence value at `(f u, f v)` with the current seed and number of octaves.
+In the Marble and Wood formulas, `turbulence` is computed using the current seed, number of octaves, lacunarity and gain values.
 
 ## Design Rationale
 
@@ -137,7 +137,7 @@ To evaluate the new lacunarity and gain controls, I compared the fBm texture at 
 
 | Gain = 0.30 | Gain = 0.50 | Gain = 0.80 |
 |:-:|:-:|:-:|
-| ![fBm gain 0.30](screenshots/compare-gain-030.png)<br>Lower gain reduces the contribution of the higher octaves, so the texture looks smoother. | ![fBm gain 0.50](screenshots/compare-gain-050.png)<br>This gives a balanced amount of multi-scale detail. | ![fBm gain 0.80](screenshots/compare-gain-080.png)<br>Higher gain keeps the fine-detail octaves stronger, so the texture becomes more grainy and dense. |
+| ![fBm gain 0.30](screenshots/compare-gain-030.png)<br>Larger light and dark regions are visible, with smoother transitions and less fine detail. | ![fBm gain 0.50](screenshots/compare-gain-050.png)<br>Smaller details become more noticeable, while the larger light and dark regions remain visible. | ![fBm gain 0.80](screenshots/compare-gain-080.png)<br>Fine details become more prominent, making the texture look denser and rougher, while the larger regions become less distinct. |
 
 ### Lacunarity comparison (`gain = 0.5`)
 
@@ -155,12 +155,13 @@ During this review:
 - I found that fBm and turbulence could produce NaN when called with zero octaves, so I added a guard for that case and corresponding checks.
 - The default Clouds texture looked too washed out, so I increased the contrast around the midpoint and updated the related check.
 - I tested a different noise approach for the Wood distortion locally. It did not improve the visual result, so I reverted that experiment before committing it.
-- I later exposed the lacunarity and gain values that were previously fixed inside fBm and turbulence. I added UI controls for both and compared their effect on fBm, Turbulence, Clouds and Marble.
+- I later exposed the lacunarity and gain values that were previously fixed inside fBm and turbulence. I added UI controls for both, visually tested their effect on fBm, Turbulence, Clouds and Marble, and documented parameter comparisons using fBm screenshots.
 - After the visual comparison, I kept the original default values of lacunarity 2.0 and gain 0.5 because they gave the most balanced default result, while keeping the controls available for experimentation.
 
 ## AI-Assisted Development
 
 This project was developed with AI assistance, used as a development aid for planning, implementation support and code review. The algorithms, all code changes, the build results and the visual output were reviewed and verified manually.
+After the initial implementation, I reviewed the project again, identified and fixed issues, made visual improvements, and added more controls and tests based on the review.
 
 ## Project Structure
 
